@@ -1,0 +1,152 @@
+Solution:
+
+wd.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: worker
+  name: worker
+  namespace: vote
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: worker
+    spec:
+      containers:
+      - image: kodekloud/examplevotingapp_worker
+        name: worker
+        resources: {}
+        
+    DD.yaml
+    
+    
+    apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: db-deployment
+  name: db-deployment
+  namespace: vote
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-deployment
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: db-deployment
+    spec:
+      volumes:
+      - name: db-data
+        emptyDir: {}
+      containers:
+      - image: postgres:9.4
+        name: db-deployment
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/postgresql/data
+        env:
+        - name: username
+          value: reddy
+        - name: password
+          value: reddy
+        resources: {}
+        
+     VD.yaml
+     
+     apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: vote-deployment
+  name: vote-deployment
+  namespace: vote
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vote-deployment
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: vote-deployment
+    spec:
+      containers:
+      - image: kodekloud/examplevotingapp_vote:before
+        name: vote-deployment
+        resources: {}
+        
+    rd.yaml
+    
+    apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: redis-deployment
+  name: redis-deployment
+  namespace: vote
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-deployment
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: redis-deployment
+    spec:
+      volumes:
+      - name: redis-data
+        emptyDir: {}
+      containers:
+      - image: redis:alpine
+        name: redis
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        resources: {}
+     
+     
+     cat VS.yaml
+     
+     apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: vote-service
+  name: vote-service
+  namespace: vote
+spec:
+  ports:
+  - port: 5000
+    protocol: TCP
+    targetPort: 80
+    nodePort: 31000
+  selector:
+    app: vote-deployment
+  type: NodePort
+status:
+  loadBalancer: {}
